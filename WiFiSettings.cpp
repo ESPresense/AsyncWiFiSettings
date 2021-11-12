@@ -411,7 +411,7 @@ void WiFiSettingsClass::portal()
 
     if (onPortal) onPortal();
     String ip = WiFi.softAPIP().toString();
-    Serial.println(ip);
+    Serial.printf("IP: %s", ip.c_str());
 
     auto redirect = [this, &ip]()
     {
