@@ -384,7 +384,6 @@ void WiFiSettingsClass::httpLoop()
 
 void WiFiSettingsClass::portal()
 {
-    DNSServer dns;
     int num_networks = -1;
     begin();
 
@@ -393,16 +392,20 @@ void WiFiSettingsClass::portal()
     #else
         WiFi.disconnect(true);
     #endif
+    WiFi.mode(WIFI_AP);
 
     Serial.println(F("Starting access point for configuration portal."));
     if (secure && password.length()) {
         Serial.printf("SSID: '%s', Password: '%s'\n", hostname.c_str(), password.c_str());
-        WiFi.softAP(hostname.c_str(), password.c_str());
+        if (!WiFi.softAP(hostname.c_str(), password.c_str()))
+            Serial.println("Failed to start access point!");
     } else {
         Serial.printf("SSID: '%s'\n", hostname.c_str());
-        WiFi.softAP(hostname.c_str());
+        if (!WiFi.softAP(hostname.c_str()))
+            Serial.println("Failed to start access point!");
     }
     delay(500);
+    DNSServer dns;
     dns.setTTL(0);
     dns.start(53, "*", WiFi.softAPIP());
 
