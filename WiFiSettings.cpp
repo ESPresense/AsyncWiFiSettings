@@ -629,8 +629,9 @@ bool WiFiSettingsClass::connect(bool portal, int wait_seconds) {
         this->portal();
     }
 
-    Serial.print(F("Connecting to WiFi SSID "));
+    Serial.print(F("Connecting to WiFi SSID '"));
     Serial.print(ssid);
+    Serial.print(F("'"));
     if (onConnect) onConnect();
 
     WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);  // arduino-esp32 #2537
