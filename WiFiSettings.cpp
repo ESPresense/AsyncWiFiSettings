@@ -449,7 +449,7 @@ void WiFiSettingsClass::portal()
                                    "*{box-sizing:border-box} "
                                    "html{background:#444;font:10pt sans-serif}"
                                    "body{background:#ccc;color:black;max-width:30em;padding:1em;margin:1em auto}"
-                                   "a:link{color:#000} "
+                                   "a:link{color:#000;text-decoration: none} "
                                    "label{clear:both}"
                                    "select,input:not([type^=c]){display:block;width:100%;border:1px solid #444;padding:.3ex}"
                                    "input[type^=s]{display:inline;width:auto;background:#de1;padding:1ex;border:1px solid #000;border-radius:1ex}"
