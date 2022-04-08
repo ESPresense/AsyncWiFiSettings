@@ -28,6 +28,7 @@ class WiFiSettingsClass {
         String string(const String& name, const String& init = "", const String& label = "");
         String string(const String& name, unsigned int max_length, const String& init = "", const String& label = "");
         String string(const String& name, unsigned int min_length, unsigned int max_length, const String& init = "", const String& label = "");
+        long dropdown(const String& name, std::vector<String> options, long init = 0, const String& label = "");
         long integer(const String& name, long init = 0, const String& label = "");
         long integer(const String& name, long min, long max, long init = 0, const String& label = "");
         float floating(const String &name, float init = 0, const String &label = "");

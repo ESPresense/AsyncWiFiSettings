@@ -86,6 +86,32 @@ namespace {  // Helpers
         virtual String html() = 0;
     };
 
+    struct WiFiSettingsDropdown : WiFiSettingsParameter {
+        virtual void set(const String& v) { value = v; }
+        std::vector<String> options;
+        String html()
+        {
+            String h = F("<p><label>{label}:<br><select name='{name}' value='{value}' placeholder='{init}'>");
+            h.replace("{name}", html_entities(name));
+            h.replace("{value}", html_entities(value));
+            h.replace("{init}", html_entities(init));
+            h.replace("{label}", html_entities(label));
+            int v = value.toInt();
+            int i = 0;
+            for (auto &o : options)
+            {
+                String opt = F("<option value='{code}'{sel}>{name}</option>");
+                opt.replace("{code}", String(i));
+                opt.replace("{name}", o);
+                opt.replace("{sel}", v == i ? " selected" : "");
+                h += opt;
+                i++;
+            }
+            h +=(F("</select></label>"));
+            return h;
+        }
+    };
+
     struct WiFiSettingsString : WiFiSettingsParameter {
         virtual void set(const String& v) { value = v; }
         String html() {
@@ -187,6 +213,19 @@ String WiFiSettingsClass::string(const String& name, unsigned int min_length, un
     params.back()->min = min_length;
     params.back()->max = max_length;
     return rv;
+}
+
+long WiFiSettingsClass::dropdown(const String &name, std::vector<String> options, long init, const String &label) {
+    begin();
+    struct WiFiSettingsDropdown* x = new WiFiSettingsDropdown();
+    x->name = name;
+    x->label = label.length() ? label : name;
+    x->init = init;
+    x->options = options;
+    x->fill();
+
+    params.push_back(x);
+    return (x->value.length() ? x->value : x->init).toInt();
 }
 
 long WiFiSettingsClass::integer(const String& name, long init, const String& label) {
