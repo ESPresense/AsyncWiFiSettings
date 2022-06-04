@@ -673,7 +673,9 @@ bool WiFiSettingsClass::connect(bool portal, int wait_seconds) {
     Serial.print(F("'"));
     if (onConnect) onConnect();
 
+    #ifndef CONFIG_IDF_TARGET_ESP32C3 // https://github.com/Juerd/ESP-WiFiSettings/issues/24#issuecomment-995661965
     WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);  // arduino-esp32 #2537
+    #endif
     WiFi.setHostname(hostname.c_str());
     WiFi.begin(ssid.c_str(), pw.c_str());
 
