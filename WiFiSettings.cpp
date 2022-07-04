@@ -1,7 +1,7 @@
 #include "WiFiSettings.h"
 #ifdef ESP32
     #define ESPFS SPIFFS
-    #define ESPMAC (Sprintf("%06" PRIx64, ESP.getEfuseMac() >> 24))
+    #define ESPMAC (Sprintf("%06" PRIx32, ((uint32_t)(ESP.getEfuseMac() >> 24))))
     #include <SPIFFS.h>
     #include <WiFi.h>
     #include <WebServer.h>
@@ -55,6 +55,14 @@ namespace {  // Helpers
             password.concat( passchars[random(strlen(passchars))] );
         }
         return password;
+    }
+
+    String secure(const String& raw) {
+        String r;
+        for (unsigned int i = 0; i < raw.length(); i++) {
+            r += ' ';
+        }
+        return r;
     }
 
     String html_entities(const String& raw) {
@@ -126,6 +134,24 @@ namespace {  // Helpers
         }
     };
 
+        struct WiFiSettingsPassword : WiFiSettingsParameter {
+        virtual void set(const String& v) {
+            String trimmed = v;
+            trimmed.trim();
+            if (trimmed.length()) value = trimmed;
+        }
+        String html() {
+            String h = F("<p><label>{label}:<br><input type='password' name='{name}' value='{value}' placeholder='{init}' minlength={min} maxlength={max}></label>");
+            h.replace("{name}", html_entities(name));
+            h.replace("{value}", html_entities(secure(value)));
+            h.replace("{init}", html_entities(init));
+            h.replace("{label}", html_entities(label));
+            h.replace("{min}", String(min));
+            h.replace("{max}", String(max));
+            return h;
+        }
+    };
+
     struct WiFiSettingsInt : WiFiSettingsParameter
     {
         virtual void set(const String& v) { value = v; }
@@ -188,6 +214,18 @@ namespace {  // Helpers
     };
 
     struct std::vector<WiFiSettingsParameter*> params;
+}
+
+String WiFiSettingsClass::pstring(const String& name, const String& init, const String& label) {
+    begin();
+    struct WiFiSettingsPassword* x = new WiFiSettingsPassword();
+    x->name = name;
+    x->label = label.length() ? label : name;
+    x->init = init;
+    x->fill();
+
+    params.push_back(x);
+    return x->value.length() ? x->value : x->init;
 }
 
 String WiFiSettingsClass::string(const String& name, const String& init, const String& label) {
