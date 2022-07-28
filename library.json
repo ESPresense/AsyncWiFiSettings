@@ -2,7 +2,7 @@
     "name": "ESP-WiFiSettings",
     "version": "3.8.0",
     "keywords": "esp32, esp8266, wifi",
-    "description": "WiFi Manager for the ESP32 and ESP8266 Arduino environments", 
+    "description": "WiFi Manager for the ESP32 and ESP8266 Arduino environments",
     "authors": [
         { "name": "Juerd Waalboer" },
         {
@@ -12,5 +12,12 @@
     ],
     "repository": { "type": "git", "url": "https://github.com/Juerd/ESP-WiFiSettings" },
     "frameworks": "arduino",
-    "platforms": [ "espressif32", "espressif8266" ]
+    "platforms": [ "espressif32", "espressif8266" ],
+    "dependencies": [
+        {
+          "name": "me-no-dev/ESP Async WebServer",
+          "version": ">=1.2.3",
+          "platforms": "espressif32"
+        }
+      ]
 }

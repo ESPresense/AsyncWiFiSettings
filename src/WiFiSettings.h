@@ -4,14 +4,7 @@
 #include <Arduino.h>
 #include <functional>
 
-#ifdef ESP32
-#include <WebServer.h>
-#elif ESP8266
-#include <ESP8266WebServer.h>
-#define WebServer ESP8266WebServer
-#else
-#error "This library only supports ESP32 and ESP8266"
-#endif
+#include <ESPAsyncWebServer.h>
 
 class WiFiSettingsClass {
     public:
@@ -23,9 +16,8 @@ class WiFiSettingsClass {
         void begin();
         bool connect(bool portal = true, int wait_seconds = 30);
         void portal();
-        void httpSetup();
-        void httpLoop();
-        String string(const String& name, const String& init = "", const String& label = "");
+        void httpSetup(bool softAP = false);
+        String string(const String &name, const String &init = "", const String &label = "");
         String string(const String& name, unsigned int max_length, const String& init = "", const String& label = "");
         String string(const String& name, unsigned int min_length, unsigned int max_length, const String& init = "", const String& label = "");
         String pstring(const String& name, const String& init = "", const String& label = "");
@@ -45,6 +37,7 @@ class WiFiSettingsClass {
         bool secure;
         String language;
 
+        std::function<void(AsyncWebServer*)> onHttpSetup;
         TCallback onConnect;
         TCallbackReturnsInt onWaitLoop;
         TCallback onSuccess;
@@ -56,7 +49,7 @@ class WiFiSettingsClass {
         TCallback onRestart;
         TCallback onPortalWaitLoop;
     private:
-        WebServer http;
+        AsyncWebServer http;
         bool begun = false;
         bool httpBegun = false;
 };

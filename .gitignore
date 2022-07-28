@@ -1,1 +1,8 @@
 .vscode
+.idea
+.cmake
+.pio
+node_modules
+cmake-build-*
+CMakeLists.txt
+CMakeListsPrivate.txt
