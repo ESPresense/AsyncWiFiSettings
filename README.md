@@ -1,4 +1,4 @@
-# WiFi configuration manager for the ESP32 and ESP8266 platforms in the Arduino framework
+# WiFi configuration manager for the ESP32 platform in the Arduino framework
 
 <p align=center>
 <img alt="Screenshot of basic example" src="screenshots/basic-example.png" width="30%">
@@ -7,7 +7,7 @@
 </p>
 
 <!--ts-->
-   * [WiFi configuration manager for the ESP32 and ESP8266 platforms in the Arduino framework](#wifi-configuration-manager-for-the-esp32-and-esp8266-platforms-in-the-arduino-framework)
+   * [WiFi configuration manager for the ESP32 platforms in the Arduino framework](#wifi-configuration-manager-for-the-esp32-and-esp8266-platforms-in-the-arduino-framework)
       * [Description](#description)
       * [Examples](#examples)
          * [Minimal usage](#minimal-usage)
@@ -17,21 +17,21 @@
       * [Installing](#installing)
       * [Reference](#reference)
          * [Functions](#functions)
-            * [WiFiSettings.connect([...])](#wifisettingsconnect)
-            * [WiFiSettings.portal()](#wifisettingsportal)
-            * [WiFiSettings.integer(...)](#wifisettingsinteger)
-            * [WiFiSettings.string(...)](#wifisettingsstring)
-            * [WiFiSettings.checkbox(...)](#wifisettingscheckbox)
-            * [WiFiSettings.html(...)](#wifisettingshtml)
-            * [WiFiSettings.heading(...)](#wifisettingsheading)
-            * [WiFiSettings.warning(...)](#wifisettingswarning)
-            * [WiFiSettings.info(...)](#wifisettingsinfo)
+            * [AsyncWiFiSettings.connect([...])](#AsyncWiFiSettingsconnect)
+            * [AsyncWiFiSettings.portal()](#AsyncWiFiSettingsportal)
+            * [AsyncWiFiSettings.integer(...)](#AsyncWiFiSettingsinteger)
+            * [AsyncWiFiSettings.string(...)](#AsyncWiFiSettingsstring)
+            * [AsyncWiFiSettings.checkbox(...)](#AsyncWiFiSettingscheckbox)
+            * [AsyncWiFiSettings.html(...)](#AsyncWiFiSettingshtml)
+            * [AsyncWiFiSettings.heading(...)](#AsyncWiFiSettingsheading)
+            * [AsyncWiFiSettings.warning(...)](#AsyncWiFiSettingswarning)
+            * [AsyncWiFiSettings.info(...)](#AsyncWiFiSettingsinfo)
          * [Variables](#variables)
-            * [WiFiSettings.hostname](#wifisettingshostname)
-            * [WiFiSettings.password](#wifisettingspassword)
-            * [WiFiSettings.secure](#wifisettingssecure)
-            * [WiFiSettings.language](#wifisettingslanguage)
-            * [WiFiSettings.on*](#wifisettingson)
+            * [AsyncWiFiSettings.hostname](#AsyncWiFiSettingshostname)
+            * [AsyncWiFiSettings.password](#AsyncWiFiSettingspassword)
+            * [AsyncWiFiSettings.secure](#AsyncWiFiSettingssecure)
+            * [AsyncWiFiSettings.language](#AsyncWiFiSettingslanguage)
+            * [AsyncWiFiSettings.on*](#AsyncWiFiSettingson)
       * [History](#history)
       * [A note about Hyrum's Law](#a-note-about-hyrums-law)
 
@@ -42,7 +42,7 @@
 ## Description
 
 This is a very simple, and somewhat naive, WiFi configuration manager for
-ESP32 and ESP8266 programs written in the Arduino framework. It will allow you
+ESP32 programs written in the Arduino framework. It will allow you
 to configure your WiFi network name (SSID) and password via a captive portal:
 the ESP becomes an access point with a web based configuration page.
 
@@ -66,13 +66,13 @@ Only automatic IP address assignment (DHCP) is supported.
 
 ```C++
 #include <SPIFFS.h>
-#include <WiFiSettings.h>
+#include <AsyncWiFiSettings.h>
 
 void setup() {
     Serial.begin(115200);
     SPIFFS.begin(true);  // On first run, will format after failing to mount
 
-    WiFiSettings.connect();
+    AsyncWiFiSettings.connect();
 }
 
 void loop() {
@@ -88,54 +88,43 @@ void setup() {
     SPIFFS.begin(true);  // On first run, will format after failing to mount
 
     // Note that these examples call functions that you probably don't have.
-    WiFiSettings.onSuccess  = []() { green(); };
-    WiFiSettings.onFailure  = []() { red(); };
-    WiFiSettings.onWaitLoop = []() { blue(); return 30; };  // delay 30 ms
-    WiFiSettings.onPortalWaitLoop = []() { blink(); };
+    AsyncWiFiSettings.onSuccess  = []() { green(); };
+    AsyncWiFiSettings.onFailure  = []() { red(); };
+    AsyncWiFiSettings.onWaitLoop = []() { blue(); return 30; };  // delay 30 ms
+    AsyncWiFiSettings.onPortalWaitLoop = []() { blink(); };
 
-    String host = WiFiSettings.string( "server_host", "default.example.org");
-    int    port = WiFiSettings.integer("server_port", 0, 65535, 443);
+    String host = AsyncWiFiSettings.string( "server_host", "default.example.org");
+    int    port = AsyncWiFiSettings.integer("server_port", 0, 65535, 443);
 
-    WiFiSettings.connect(true, 30);
+    AsyncWiFiSettings.connect(true, 30);
 }
 ```
 
 ### Other examples
 
 * The [ArduinoOTA example](examples/ArduinoOTA/ArduinoOTA.ino) shows how to
-enable over-the-air uploads in the WiFiSettings configuration portal. If you
-use the password from WiFiSettings as your OTA password, you no longer have
+enable over-the-air uploads in the AsyncWiFiSettings configuration portal. If you
+use the password from AsyncWiFiSettings as your OTA password, you no longer have
 to hard code it!
-
-### Note for ESP8266 users
-
-The examples are written for ESP32. To use them with the older ESP8266 chip,
-note that in the ESP8266 world, SPIFFS is deprecated and replaced by LittleFS.
-
-WifiSettings uses SPIFFS on ESP32, and LittleFS on ESP8266.
-
-Simply change both occurrences of `SPIFFS` to `LittleFS`, and remove `true` in
-the call to `LittleFS.begin();`. LittleFS will format the filesystem by
-default.
 
 ## Installing
 
 Automated installation:
 * [Instructions for Arduino Library Manager](https://www.arduino.cc/en/guide/libraries)
-* [Instructions for PlatformIO Library Manager](https://platformio.org/lib/show/7251/esp32-WiFiSettings/installation)
+* [Instructions for PlatformIO Library Manager](https://platformio.org/lib/show/7251/esp32-AsyncWiFiSettings/installation)
 
 Getting the source for manual installation:
-* `git clone https://github.com/Juerd/ESP-WiFiSettings`
-* [.zip and .tar.gz files](https://github.com/Juerd/ESP-WiFiSettings/releases)
+* `git clone https://github.com/ESPresense/AsyncWiFiSettings`
+* [.zip and .tar.gz files](https://github.com/ESPresense/AsyncWiFiSettings/releases)
 
 ## Reference
 
-This library uses a singleton instance (object), `WiFiSettings`, and is not
+This library uses a singleton instance (object), `AsyncWiFiSettings`, and is not
 designed to be inherited from (subclassed), or to have multiple instances.
 
 ### Functions
 
-#### WiFiSettings.connect([...])
+#### AsyncWiFiSettings.connect([...])
 
 ```C++
 bool connect(bool portal = true, int wait_seconds = 30);
@@ -155,12 +144,12 @@ the value of `portal` is ignored.
 
 Calls the following callbacks:
 
-* WiFiSettings.onConnect
-* WiFiSettings.onWaitLoop -> int (milliseconds to wait)
-* WiFiSettings.onSuccess
-* WiFiSettings.onFailure
+* AsyncWiFiSettings.onConnect
+* AsyncWiFiSettings.onWaitLoop -> int (milliseconds to wait)
+* AsyncWiFiSettings.onSuccess
+* AsyncWiFiSettings.onFailure
 
-#### WiFiSettings.portal()
+#### AsyncWiFiSettings.portal()
 
 ```C++
 void portal();
@@ -177,16 +166,16 @@ This function never ends. A restart is required to resume normal operation.
 
 Calls the following callbacks:
 
-* WiFiSettings.onPortal
-* WiFiSettings.onPortalWaitLoop
-* WiFiSettings.onPortalView
-* WiFiSettings.onUserAgent(String& ua)
-* WiFiSettings.onConfigSaved
-* WiFiSettings.onRestart
+* AsyncWiFiSettings.onPortal
+* AsyncWiFiSettings.onPortalWaitLoop
+* AsyncWiFiSettings.onPortalView
+* AsyncWiFiSettings.onUserAgent(String& ua)
+* AsyncWiFiSettings.onConfigSaved
+* AsyncWiFiSettings.onRestart
 
-#### WiFiSettings.integer(...)
-#### WiFiSettings.string(...)
-#### WiFiSettings.checkbox(...)
+#### AsyncWiFiSettings.integer(...)
+#### AsyncWiFiSettings.string(...)
+#### AsyncWiFiSettings.checkbox(...)
 
 ```C++
 int integer(String name, [long min, long max,] int init = 0, String label = name);
@@ -219,10 +208,10 @@ strings, a maximum length can be specified as `max_length`. A minimum string
 length can be set with `min_length`, effectively making the field mandatory:
 it can no longer be left empty to get the `init` value.
 
-#### WiFiSettings.html(...)
-#### WiFiSettings.heading(...)
-#### WiFiSettings.warning(...)
-#### WiFiSettings.info(...)
+#### AsyncWiFiSettings.html(...)
+#### AsyncWiFiSettings.heading(...)
+#### AsyncWiFiSettings.warning(...)
+#### AsyncWiFiSettings.info(...)
 
 ```C++
 void html(String tag, String contents, bool escape = true);
@@ -249,7 +238,7 @@ implications of using unescaped data from external sources.
 Note: because of the way this library is designed, any assignment to the
 member variables should be done *before* calling any of the functions.
 
-#### WiFiSettings.hostname
+#### AsyncWiFiSettings.hostname
 
 ```C++
 String
@@ -268,7 +257,7 @@ between other characters (i.e. not two in a row, and not as the first
 character). Most characters, including underscores (`_`) and spaces, are not
 valid in hostnames.
 
-#### WiFiSettings.password
+#### AsyncWiFiSettings.password
 
 ```C++
 String
@@ -285,7 +274,7 @@ password, instead of "hard coding" a password.
 
 The password has no effect unless the portal is secured; see `.secure`.
 
-#### WiFiSettings.secure
+#### AsyncWiFiSettings.secure
 
 ```C++
 bool
@@ -302,17 +291,17 @@ used.
 When forcing secure mode, it is still recommended to leave `.password` unset so
 that a password is automatically generated, if you have a way to communicate it
 to the user, for example with an LCD display, or
-`Serial.println(WiFiSettings.password);`. Having hard coded password literals
+`Serial.println(AsyncWiFiSettings.password);`. Having hard coded password literals
 in source code is generally considered a bad idea, because that makes it harder
 to share the code with others.
 
-#### WiFiSettings.language
+#### AsyncWiFiSettings.language
 
 ```C++
 String
 ```
 
-The language to be used in the WiFiSettings portal. Currently supported are
+The language to be used in the AsyncWiFiSettings portal. Currently supported are
 `en` and `nl`. Once the user has picked a language in the portal, the user
 setting overrides any value previously assigned. This variable is updated to
 reflect the currently selected language.
@@ -327,29 +316,14 @@ flags can be specified in the `[env]` section, e.g. `build_flags =
 -DLANGUAGE_EN`.
 
 *If you wish to contribute a translation, please refer to
-`WiFiSettings_strings.h`. (Note: due to storage constraints on microcontroller
+`AsyncWiFiSettings_strings.h`. (Note: due to storage constraints on microcontroller
 flash filesystems, only widely used natural languages will be included.)*
 
-#### WiFiSettings.on*
+#### AsyncWiFiSettings.on*
 
 The callback functions are mentioned in the documentation for the respective
 functions that call them.
 
 ## History
 
-Note that this library was briefly named WiFiConfig, but was renamed to
-WiFiSettings because there was already another library called
-[WiFiConfig](https://github.com/snakeye/WifiConfig).
-
-From version 3.0.0, based on a contribution by Reinier van der Leer, this
-library also supports the older ESP8266, and the repository was renamed from
-esp32-WiFiSettings to ESP-WiFiSettings.
-
-## A note about Hyrum's Law
-
-It is said that *all observable behaviors of your system will be depended on by
-somebody*, and you are of course free to explore the source and use any
-unintended feature you may find to your advantage. Bear in mind, however, that
-depending on any behavior that is not documented here, is more likely to cause
-breakage when you install a newer version of this library. The author feels no
-obligation to keep backwards compatibility with undocumented features :)
+This was forked from https://github.com/Juerd/ESP-WiFiSettings when it was converted to use AsyncWebServer instead of WebServer.

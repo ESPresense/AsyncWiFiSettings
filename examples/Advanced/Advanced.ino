@@ -1,18 +1,18 @@
 /*
-    WifiSettings advanced example
+    AsyncWiFiSettings advanced example
 
     Demonstrates callback functions and custom variables
-    to be saved through WifiSettings.
+    to be saved through AsyncWiFiSettings.
 
     Source and further documentation available at
-    https://github.com/Juerd/ESP-WiFiSettings
+    https://github.com/ESPresense/AsyncWiFiSettings
 
     Note: this example is written for ESP32.
     For ESP8266, use LittleFS.begin() instead of SPIFFS.begin(true).
 */
 
 #include <SPIFFS.h>
-#include <WiFiSettings.h>
+#include <AsyncWiFiSettings.h>
 
 // Status LED
 const uint32_t LED_PIN = 2;
@@ -26,28 +26,28 @@ void setup() {
     pinMode(LED_PIN, OUTPUT);
 
     // Set custom callback functions
-    WiFiSettings.onSuccess  = []() {
+    AsyncWiFiSettings.onSuccess  = []() {
         digitalWrite(LED_PIN, LED_ON); // Turn LED on
     };
-    WiFiSettings.onFailure  = []() {
+    AsyncWiFiSettings.onFailure  = []() {
         digitalWrite(LED_PIN, LED_OFF); // Turn LED off
     };
-    WiFiSettings.onWaitLoop = []() {
+    AsyncWiFiSettings.onWaitLoop = []() {
         digitalWrite(LED_PIN, !digitalRead(LED_PIN)); // Toggle LED
         return 500; // Delay next function call by 500ms
     };
 
     // Callback functions do not have to be lambda's, e.g.
-    // WiFiSettings.onPortalWaitLoop = blink;
+    // AsyncWiFiSettings.onPortalWaitLoop = blink;
 
-    // Define custom settings saved by WifiSettings
+    // Define custom settings saved by AsyncWiFiSettings
     // These will return the default if nothing was set before
-    String host = WiFiSettings.string( "server_host", "default.example.org");
-    int    port = WiFiSettings.integer("server_port", 443);
+    String host = AsyncWiFiSettings.string( "server_host", "default.example.org");
+    int    port = AsyncWiFiSettings.integer("server_port", 443);
 
     // Connect to WiFi with a timeout of 30 seconds
     // Launches the portal if the connection failed
-    WiFiSettings.connect(true, 30);
+    AsyncWiFiSettings.connect(true, 30);
 }
 
 void loop() {

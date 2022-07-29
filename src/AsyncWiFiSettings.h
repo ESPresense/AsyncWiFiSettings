@@ -1,18 +1,18 @@
-#ifndef WiFiSettings_h
-#define WiFiSettings_h
+#ifndef AsyncWiFiSettings_h
+#define AsyncWiFiSettings_h
 
 #include <Arduino.h>
 #include <functional>
 
 #include <ESPAsyncWebServer.h>
 
-class WiFiSettingsClass {
+class AsyncWiFiSettingsClass {
     public:
         typedef std::function<void(void)> TCallback;
         typedef std::function<int(void)> TCallbackReturnsInt;
         typedef std::function<void(String&)> TCallbackString;
 
-        WiFiSettingsClass();
+        AsyncWiFiSettingsClass();
         void begin();
         bool connect(bool portal = true, int wait_seconds = 30);
         void portal();
@@ -54,6 +54,6 @@ class WiFiSettingsClass {
         bool httpBegun = false;
 };
 
-extern WiFiSettingsClass WiFiSettings;
+extern AsyncWiFiSettingsClass AsyncWiFiSettings;
 
 #endif

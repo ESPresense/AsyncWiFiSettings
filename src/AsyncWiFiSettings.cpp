@@ -1,4 +1,4 @@
-#include "WiFiSettings.h"
+#include "AsyncWiFiSettings.h"
 
 #define ESPFS SPIFFS
 #define ESPMAC (Sprintf("%06" PRIx32, ((uint32_t)(ESP.getEfuseMac() >> 24))))
@@ -11,9 +11,9 @@
 #include <DNSServer.h>
 #include <limits.h>
 #include <vector>
-#include "WiFiSettings_strings.h"
+#include "AsyncWiFiSettings_strings.h"
 
-WiFiSettingsLanguage::Texts _WSL_T;
+AsyncWiFiSettingsLanguage::Texts _WSL_T;
 
 #define Sprintf(f, ...) ({ char* s; asprintf(&s, f, __VA_ARGS__); String r = s; free(s); r; })
 
@@ -65,7 +65,7 @@ namespace {  // Helpers
         return r;
     }
 
-    struct WiFiSettingsParameter {
+    struct AsyncWiFiSettingsParameter {
         String name;
         String label;
         String value;
@@ -88,7 +88,7 @@ namespace {  // Helpers
         virtual String html() = 0;
     };
 
-    struct WiFiSettingsDropdown : WiFiSettingsParameter {
+    struct AsyncWiFiSettingsDropdown : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
         std::vector <String> options;
@@ -114,7 +114,7 @@ namespace {  // Helpers
         }
     };
 
-    struct WiFiSettingsString : WiFiSettingsParameter {
+    struct AsyncWiFiSettingsString : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
         String html() {
@@ -130,7 +130,7 @@ namespace {  // Helpers
         }
     };
 
-    struct WiFiSettingsPassword : WiFiSettingsParameter {
+    struct AsyncWiFiSettingsPassword : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) {
             String trimmed = v;
             trimmed.trim();
@@ -150,7 +150,7 @@ namespace {  // Helpers
         }
     };
 
-    struct WiFiSettingsInt : WiFiSettingsParameter {
+    struct AsyncWiFiSettingsInt : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
         String html() {
@@ -166,7 +166,7 @@ namespace {  // Helpers
         }
     };
 
-    struct WiFiSettingsFloat : WiFiSettingsParameter {
+    struct AsyncWiFiSettingsFloat : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
         String html() {
@@ -182,7 +182,7 @@ namespace {  // Helpers
         }
     };
 
-    struct WiFiSettingsBool : WiFiSettingsParameter {
+    struct AsyncWiFiSettingsBool : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v.length() ? "1" : "0"; }
 
         String html() {
@@ -197,7 +197,7 @@ namespace {  // Helpers
         }
     };
 
-    struct WiFiSettingsHTML : WiFiSettingsParameter {
+    struct AsyncWiFiSettingsHTML : AsyncWiFiSettingsParameter {
         // Raw HTML, not an actual parameter. The reason for the "if (name)"
         // in store and fill. Abuses several member variables for completely
         // different functionality.
@@ -215,12 +215,12 @@ namespace {  // Helpers
         }
     };
 
-    struct std::vector<WiFiSettingsParameter *> params;
+    struct std::vector<AsyncWiFiSettingsParameter *> params;
 }
 
-String WiFiSettingsClass::pstring(const String &name, const String &init, const String &label) {
+String AsyncWiFiSettingsClass::pstring(const String &name, const String &init, const String &label) {
     begin();
-    struct WiFiSettingsPassword *x = new WiFiSettingsPassword();
+    struct AsyncWiFiSettingsPassword *x = new AsyncWiFiSettingsPassword();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -230,9 +230,9 @@ String WiFiSettingsClass::pstring(const String &name, const String &init, const 
     return x->value.length() ? x->value : x->init;
 }
 
-String WiFiSettingsClass::string(const String &name, const String &init, const String &label) {
+String AsyncWiFiSettingsClass::string(const String &name, const String &init, const String &label) {
     begin();
-    struct WiFiSettingsString *x = new WiFiSettingsString();
+    struct AsyncWiFiSettingsString *x = new AsyncWiFiSettingsString();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -242,14 +242,14 @@ String WiFiSettingsClass::string(const String &name, const String &init, const S
     return x->value.length() ? x->value : x->init;
 }
 
-String WiFiSettingsClass::string(const String &name, unsigned int max_length, const String &init, const String &label) {
+String AsyncWiFiSettingsClass::string(const String &name, unsigned int max_length, const String &init, const String &label) {
     String rv = string(name, init, label);
     params.back()->max = max_length;
     return rv;
 }
 
 String
-WiFiSettingsClass::string(const String &name, unsigned int min_length, unsigned int max_length, const String &init,
+AsyncWiFiSettingsClass::string(const String &name, unsigned int min_length, unsigned int max_length, const String &init,
                           const String &label) {
     String rv = string(name, init, label);
     params.back()->min = min_length;
@@ -257,9 +257,9 @@ WiFiSettingsClass::string(const String &name, unsigned int min_length, unsigned 
     return rv;
 }
 
-long WiFiSettingsClass::dropdown(const String &name, std::vector <String> options, long init, const String &label) {
+long AsyncWiFiSettingsClass::dropdown(const String &name, std::vector <String> options, long init, const String &label) {
     begin();
-    struct WiFiSettingsDropdown *x = new WiFiSettingsDropdown();
+    struct AsyncWiFiSettingsDropdown *x = new AsyncWiFiSettingsDropdown();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -270,9 +270,9 @@ long WiFiSettingsClass::dropdown(const String &name, std::vector <String> option
     return (x->value.length() ? x->value : x->init).toInt();
 }
 
-long WiFiSettingsClass::integer(const String &name, long init, const String &label) {
+long AsyncWiFiSettingsClass::integer(const String &name, long init, const String &label) {
     begin();
-    struct WiFiSettingsInt *x = new WiFiSettingsInt();
+    struct AsyncWiFiSettingsInt *x = new AsyncWiFiSettingsInt();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -282,16 +282,16 @@ long WiFiSettingsClass::integer(const String &name, long init, const String &lab
     return (x->value.length() ? x->value : x->init).toInt();
 }
 
-long WiFiSettingsClass::integer(const String &name, long min, long max, long init, const String &label) {
+long AsyncWiFiSettingsClass::integer(const String &name, long min, long max, long init, const String &label) {
     long rv = integer(name, init, label);
     params.back()->min = min;
     params.back()->max = max;
     return rv;
 }
 
-float WiFiSettingsClass::floating(const String &name, float init, const String &label) {
+float AsyncWiFiSettingsClass::floating(const String &name, float init, const String &label) {
     begin();
-    struct WiFiSettingsFloat *x = new WiFiSettingsFloat();
+    struct AsyncWiFiSettingsFloat *x = new AsyncWiFiSettingsFloat();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -301,16 +301,16 @@ float WiFiSettingsClass::floating(const String &name, float init, const String &
     return (x->value.length() ? x->value : x->init).toFloat();
 }
 
-float WiFiSettingsClass::floating(const String &name, long min, long max, float init, const String &label) {
+float AsyncWiFiSettingsClass::floating(const String &name, long min, long max, float init, const String &label) {
     float rv = floating(name, init, label);
     params.back()->min = min;
     params.back()->max = max;
     return rv;
 }
 
-bool WiFiSettingsClass::checkbox(const String &name, bool init, const String &label) {
+bool AsyncWiFiSettingsClass::checkbox(const String &name, bool init, const String &label) {
     begin();
-    struct WiFiSettingsBool *x = new WiFiSettingsBool();
+    struct AsyncWiFiSettingsBool *x = new AsyncWiFiSettingsBool();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = String((int) init);
@@ -324,9 +324,9 @@ bool WiFiSettingsClass::checkbox(const String &name, bool init, const String &la
     return x->value.toInt();
 }
 
-void WiFiSettingsClass::html(const String &tag, const String &contents, bool escape) {
+void AsyncWiFiSettingsClass::html(const String &tag, const String &contents, bool escape) {
     begin();
-    struct WiFiSettingsHTML *x = new WiFiSettingsHTML();
+    struct AsyncWiFiSettingsHTML *x = new AsyncWiFiSettingsHTML();
     x->value = tag;
     x->label = contents;
     x->min = escape;
@@ -334,19 +334,19 @@ void WiFiSettingsClass::html(const String &tag, const String &contents, bool esc
     params.push_back(x);
 }
 
-void WiFiSettingsClass::info(const String &contents, bool escape) {
+void AsyncWiFiSettingsClass::info(const String &contents, bool escape) {
     html(F("p class=i"), contents, escape);
 }
 
-void WiFiSettingsClass::warning(const String &contents, bool escape) {
+void AsyncWiFiSettingsClass::warning(const String &contents, bool escape) {
     html(F("p class=w"), contents, escape);
 }
 
-void WiFiSettingsClass::heading(const String &contents, bool escape) {
+void AsyncWiFiSettingsClass::heading(const String &contents, bool escape) {
     html("h2", contents, escape);
 }
 
-void WiFiSettingsClass::httpSetup(bool wifi) {
+void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
     begin();
 
     static int num_networks = -1;
@@ -455,12 +455,12 @@ void WiFiSettingsClass::httpSetup(bool wifi) {
             response->print(F("'></label><hr>"));
         }
 
-        if (WiFiSettingsLanguage::multiple()) {
+        if (AsyncWiFiSettingsLanguage::multiple()) {
             response->print(F("<label>"));
             response->print(_WSL_T.language);
             response->print(F(":<br><select name=language>"));
 
-            for (auto &lang: WiFiSettingsLanguage::languages) {
+            for (auto &lang: AsyncWiFiSettingsLanguage::languages) {
                 String opt = F("<option value='{code}'{sel}>{name}</option>");
                 opt.replace("{code}", lang.first);
                 opt.replace("{name}", lang.second);
@@ -497,12 +497,12 @@ void WiFiSettingsClass::httpSetup(bool wifi) {
             }
         }
 
-        if (WiFiSettingsLanguage::multiple()) {
-            if (!spurt("/WiFiSettings-language", request->arg("language"))) ok = false;
+        if (AsyncWiFiSettingsLanguage::multiple()) {
+            if (!spurt("/AsyncWiFiSettings-language", request->arg("language"))) ok = false;
             // Don't update immediately, because there is currently
             // no mechanism for reloading param strings.
             //language = request->arg("language");
-            //WiFiSettingsLanguage::select(T, language);
+            //AsyncWiFiSettingsLanguage::select(T, language);
         }
 
 
@@ -538,7 +538,7 @@ void WiFiSettingsClass::httpSetup(bool wifi) {
     http.begin();
 }
 
-void WiFiSettingsClass::portal() {
+void AsyncWiFiSettingsClass::portal() {
     begin();
 
 #ifdef ESP32
@@ -577,7 +577,7 @@ void WiFiSettingsClass::portal() {
     }
 }
 
-bool WiFiSettingsClass::connect(bool portal, int wait_seconds) {
+bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     begin();
 
     WiFi.mode(WIFI_STA);
@@ -594,7 +594,7 @@ bool WiFiSettingsClass::connect(bool portal, int wait_seconds) {
     Serial.print(F("'"));
     if (onConnect) onConnect();
 
-#if defined(ARDUINO) && ARDUINO < 200 // https://github.com/Juerd/ESP-WiFiSettings/issues/24#issuecomment-995661965
+#if defined(ARDUINO) && ARDUINO < 200 // https://github.com/ESPresense/AsyncWiFiSettings/issues/24#issuecomment-995661965
     WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);  // arduino-esp32 #2537
 #endif
     WiFi.setHostname(hostname.c_str());
@@ -619,25 +619,25 @@ bool WiFiSettingsClass::connect(bool portal, int wait_seconds) {
     return true;
 }
 
-void WiFiSettingsClass::begin() {
+void AsyncWiFiSettingsClass::begin() {
     if (begun) return;
     begun = true;
 
     // These things can't go in the constructor because the constructor runs
     // before ESPFS.begin()
 
-    String user_language = slurp("/WiFiSettings-language");
+    String user_language = slurp("/AsyncWiFiSettings-language");
     user_language.trim();
-    if (user_language.length() && WiFiSettingsLanguage::available(user_language)) {
+    if (user_language.length() && AsyncWiFiSettingsLanguage::available(user_language)) {
         language = user_language;
     }
-    WiFiSettingsLanguage::select(_WSL_T, language);  // can update language
+    AsyncWiFiSettingsLanguage::select(_WSL_T, language);  // can update language
 
 #ifdef PORTAL_PASSWORD
 
     if (!secure) {
         secure = checkbox(
-            F("WiFiSettings-secure"),
+            F("AsyncWiFiSettings-secure"),
             false,
             _WSL_T.portal_wpa
         );
@@ -645,7 +645,7 @@ void WiFiSettingsClass::begin() {
 
     if (!password.length()) {
         password = string(
-            F("WiFiSettings-password"),
+            F("AsyncWiFiSettings-password"),
             8, 63,
             "",
             _WSL_T.portal_password
@@ -664,7 +664,7 @@ void WiFiSettingsClass::begin() {
     if (hostname.endsWith("-")) hostname += ESPMAC;
 }
 
-WiFiSettingsClass::WiFiSettingsClass() : http(80) {
+AsyncWiFiSettingsClass::AsyncWiFiSettingsClass() : http(80) {
 #ifdef ESP32
     hostname = F("esp32-");
 #else
@@ -674,4 +674,4 @@ WiFiSettingsClass::WiFiSettingsClass() : http(80) {
     language = "en";
 }
 
-WiFiSettingsClass WiFiSettings;
+AsyncWiFiSettingsClass AsyncWiFiSettings;

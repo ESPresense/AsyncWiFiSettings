@@ -1,5 +1,5 @@
 {
-  "name": "esp-wifisettings",
+  "name": "AsyncWiFiSettings",
   "version": "1.0.0",
   "description": "<p align=center> <img alt=\"Screenshot of basic example\" src=\"screenshots/basic-example.png\" width=\"30%\"> <img alt=\"Screenshot of advanced example\" src=\"screenshots/advanced-example.png\" width=\"30%\"> <img alt=\"Screenshot of everything\" src=\"screenshots/full.png\" width=\"30%\"> </p>",
   "main": "index.js",
@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ESPresense/ESP-WiFiSettings.git"
+    "url": "git+https://github.com/ESPresense/AsyncWiFiSettings.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ESPresense/ESP-WiFiSettings/issues"
+    "url": "https://github.com/ESPresense/AsyncWiFiSettings/issues"
   },
-  "homepage": "https://github.com/ESPresense/ESP-WiFiSettings#readme",
+  "homepage": "https://github.com/ESPresense/AsyncWiFiSettings#readme",
   "dependencies": {
     "nodemon": "^2.0.19"
   }

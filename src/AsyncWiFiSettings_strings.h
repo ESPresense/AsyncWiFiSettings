@@ -1,6 +1,6 @@
 #include <map>
 
-namespace WiFiSettingsLanguage {
+namespace AsyncWiFiSettingsLanguage {
 
 struct Texts {
     const __FlashStringHelper
