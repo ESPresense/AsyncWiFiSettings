@@ -94,18 +94,33 @@ namespace {  // Helpers
         std::vector <String> options;
 
         String html() {
-            String h = F("<p><label>{label}:<br><select name='{name}' value='{value}' placeholder='{init}'>");
+            String h = F("<p><label>{label}:<br><select name='{name}' value='{value}'>");
             h.replace("{name}", html_entities(name));
             h.replace("{value}", html_entities(value));
-            h.replace("{init}", html_entities(init));
             h.replace("{label}", html_entities(label));
-            int v = value.toInt();
+
             int i = 0;
-            for (auto &o: options) {
+            if (value == "") {
+                for (auto &o: options) {
+                    String s = String(i);
+                    if (s == init)
+                    {
+                        String opt = F("<option value='' disabled selected hidden>{name}</option>");
+                        opt.replace("{name}", o);
+                        h += opt;
+                    }
+                    i++;
+                }
+            }
+
+            i = 0;
+            for (auto &o : options)
+            {
+                String s = String(i);
                 String opt = F("<option value='{code}'{sel}>{name}</option>");
                 opt.replace("{code}", String(i));
                 opt.replace("{name}", o);
-                opt.replace("{sel}", v == i ? " selected" : "");
+                opt.replace("{sel}", s == value ? " selected" : "");
                 h += opt;
                 i++;
             }
