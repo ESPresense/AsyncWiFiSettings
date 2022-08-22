@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "nodemon -x pio ci examples/Basic --board esp32dev --lib $PWD --project-option=\"lib_deps=ESP Async WebServer\"",
-    "upload": "nodemon -x pio ci examples/Basic --board esp32dev --lib $PWD --project-option=\"lib_deps=ESP Async WebServer\" --project-option=\"targets=upload,monitor\""
+    "upload": "nodemon -x pio ci examples/Basic --board esp32dev --lib $PWD --project-option=\"lib_deps=ESP Async WebServer\" --project-option=\"targets=upload;monitor\""
   },
   "nodemonConfig": {
     "verbose": true,

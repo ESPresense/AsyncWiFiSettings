@@ -386,7 +386,7 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
         response->print(F("</title><meta name=viewport content='width=device-width,initial-scale=1'>"
                           "<style>"
                           "*{box-sizing:border-box} "
-                          "html{background:#444;font:10pt sans-serif}"
+                          "html{background:#444;font:10pt sans-serif;width:100vw;max-width:100%} "
                           "body{background:#ccc;color:black;max-width:30em;padding:1em;margin:1em auto}"
                           "a:link{color:#000;text-decoration: none} "
                           "label{clear:both}"
@@ -569,9 +569,15 @@ void AsyncWiFiSettingsClass::portal() {
 
     httpSetup(true);
 
-    for (;;) {
+    unsigned long starttime = millis();
+    int desired = 0;
+    for (;;)
+    {
         dns.processNextRequest();
-        if (onPortalWaitLoop) onPortalWaitLoop();
+        if (onPortalWaitLoop && (millis() - starttime) > desired) {
+            desired = onPortalWaitLoop();
+            starttime = millis();
+        }
         esp_task_wdt_reset();
         delay(1);
     }

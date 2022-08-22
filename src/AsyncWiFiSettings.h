@@ -47,7 +47,7 @@ class AsyncWiFiSettingsClass {
         TCallbackString onUserAgent;
         TCallback onConfigSaved;
         TCallback onRestart;
-        TCallback onPortalWaitLoop;
+        TCallbackReturnsInt onPortalWaitLoop;
     private:
         AsyncWebServer http;
         bool begun = false;
