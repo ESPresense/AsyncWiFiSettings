@@ -7,6 +7,7 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <esp_task_wdt.h>
+#include <nvs_flash.h>
 
 #include <DNSServer.h>
 #include <limits.h>
@@ -600,6 +601,10 @@ void AsyncWiFiSettingsClass::portal() {
 
 bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     begin();
+
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES)
+        err = nvs_flash_erase();
 
     WiFi.mode(WIFI_STA);
 
