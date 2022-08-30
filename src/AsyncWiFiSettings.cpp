@@ -27,6 +27,8 @@ namespace {  // Helpers
     }
 
     bool spurt(const String &fn, const String &content) {
+        if (content.isEmpty())
+            return ESPFS.exists(fn) ? ESPFS.remove(fn) : true;
         File f = ESPFS.open(fn, "w");
         if (!f) return false;
         auto w = f.print(content);
