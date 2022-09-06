@@ -629,8 +629,8 @@ bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     unsigned long starttime = millis();
     unsigned long lastbegin = starttime;
     while (status != WL_CONNECTED) {
-        // Reconnect if "disconnected" or every 60 seconds
-        if (status == WL_DISCONNECTED || millis() - lastbegin > 60000) {
+        // Reconnect every 60 seconds
+        if (millis() - lastbegin > 60000) {
             lastbegin = millis();
             Serial.print("*");
             WiFi.disconnect(true, true);
