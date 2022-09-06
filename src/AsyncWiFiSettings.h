@@ -14,7 +14,7 @@ class AsyncWiFiSettingsClass {
 
         AsyncWiFiSettingsClass();
         void begin();
-        bool connect(bool portal = true, int wait_seconds = 30);
+        bool connect(bool portal = true, int wait_seconds = 60);
         void portal();
         void httpSetup(bool softAP = false);
         String string(const String &name, const String &init = "", const String &label = "");

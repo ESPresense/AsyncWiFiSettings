@@ -127,7 +127,7 @@ designed to be inherited from (subclassed), or to have multiple instances.
 #### AsyncWiFiSettings.connect([...])
 
 ```C++
-bool connect(bool portal = true, int wait_seconds = 30);
+bool connect(bool portal = true, int wait_seconds = 60);
 ```
 
 If no WiFi network is configured yet, starts the configuration portal.

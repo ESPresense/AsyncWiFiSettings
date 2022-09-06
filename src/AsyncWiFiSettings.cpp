@@ -7,7 +7,6 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <esp_task_wdt.h>
-#include <nvs_flash.h>
 
 #include <DNSServer.h>
 #include <limits.h>
@@ -604,11 +603,12 @@ void AsyncWiFiSettingsClass::portal() {
 bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     begin();
 
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES)
-        err = nvs_flash_erase();
+    if (WiFi.getMode() != WIFI_OFF) {
+        WiFi.mode(WIFI_OFF);
+    }
 
-    WiFi.mode(WIFI_STA);
+    WiFi.persistent(false);
+    WiFi.setAutoReconnect(false);
 
     String ssid = slurp("/wifi-ssid");
     String pw = slurp("/wifi-password");
@@ -622,21 +622,26 @@ bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     Serial.print(F("'"));
     if (onConnect) onConnect();
 
-#if defined(ARDUINO) && ARDUINO < 200 // https://github.com/ESPresense/AsyncWiFiSettings/issues/24#issuecomment-995661965
-    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);  // arduino-esp32 #2537
-#endif
     WiFi.setHostname(hostname.c_str());
-    WiFi.begin(ssid.c_str(), pw.c_str());
+    auto status = WiFi.begin(ssid.c_str(), pw.c_str());
 
     unsigned long starttime = millis();
-    while (WiFi.status() != WL_CONNECTED &&
-           (wait_seconds < 0 || (millis() - starttime) < (unsigned) wait_seconds * 1000)) {
-        Serial.print(".");
+    unsigned long lastbegin = millis();
+    while (status != WL_CONNECTED && (wait_seconds < 0 || (millis() - starttime) < wait_seconds * 1000UL)) {
+        if ((millis() - lastbegin) > 30000) {
+            lastbegin = millis();
+            Serial.print("*");
+            WiFi.disconnect(true, true);
+            status = WiFi.begin(ssid.c_str(), pw.c_str());
+        } else {
+            Serial.print(".");
+            status = WiFi.status();
+        }
         delay(onWaitLoop ? onWaitLoop() : 100);
     }
 
-    if (WiFi.status() != WL_CONNECTED) {
-        Serial.println(F(" failed."));
+    if (status != WL_CONNECTED) {
+        Serial.printf(" failed (status=%d\n).", status);
         if (onFailure) onFailure();
         if (portal) this->portal();
         return false;
