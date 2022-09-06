@@ -645,7 +645,7 @@ bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     }
 
     if (status != WL_CONNECTED) {
-        Serial.printf(" failed (status=%d\n).", status);
+        Serial.printf(" failed (status=%d).\n", status);
         if (onFailure) onFailure();
         if (portal) this->portal();
         return false;
