@@ -1,6 +1,6 @@
 {
     "name": "AsyncWiFiSettings",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "keywords": "esp32, wifi",
     "description": "WiFi Manager for the ESP32 and ESP8266 Arduino environments",
     "authors": [

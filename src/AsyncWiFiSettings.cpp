@@ -625,11 +625,12 @@ bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     WiFi.setHostname(hostname.c_str());
     auto status = WiFi.begin(ssid.c_str(), pw.c_str());
 
+    unsigned long wait_ms = wait_seconds * 1000UL;
     unsigned long starttime = millis();
-    unsigned long lastbegin = millis();
-    while (status != WL_CONNECTED && (wait_seconds < 0 || (millis() - starttime) < wait_seconds * 1000UL)) {
-        // Reconnect every 60 seconds
-        if ((millis() - lastbegin) > 60000) {
+    unsigned long lastbegin = starttime;
+    while (status != WL_CONNECTED) {
+        // Reconnect if "disconnected" or every 60 seconds
+        if (status == WL_DISCONNECTED || millis() - lastbegin > 60000) {
             lastbegin = millis();
             Serial.print("*");
             WiFi.disconnect(true, true);
@@ -639,6 +640,8 @@ bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
             status = WiFi.status();
         }
         delay(onWaitLoop ? onWaitLoop() : 100);
+        if (wait_seconds >= 0 && millis() - starttime > wait_ms)
+            break;
     }
 
     if (status != WL_CONNECTED) {
