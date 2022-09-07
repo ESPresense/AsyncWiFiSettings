@@ -7,6 +7,7 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <esp_task_wdt.h>
+#include <esp_wifi.h>
 
 #include <DNSServer.h>
 #include <limits.h>
@@ -606,6 +607,8 @@ bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     if (WiFi.getMode() != WIFI_OFF) {
         WiFi.mode(WIFI_OFF);
     }
+
+    esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_BW_HT20);
 
     WiFi.persistent(false);
     WiFi.setAutoReconnect(false);
