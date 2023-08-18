@@ -393,7 +393,7 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
 
         if (interactive && onPortalView) onPortalView();
 
-        response->print(F("<!DOCTYPE html>\n<meta charset=UTF-8><title>"));
+        response->print(F("<!DOCTYPE html>\n<title>"));
         response->print(html_entities(hostname));
         response->print(F("</title><meta name=viewport content='width=device-width,initial-scale=1'>"
                           "<style>"
