@@ -136,14 +136,11 @@ namespace {  // Helpers
         virtual void set(const String &v) { value = v; }
 
         String html() {
-            String h = F(
-                    "<p><label>{label}:<br><input name='{name}' value='{value}' placeholder='{init}' minlength={min} maxlength={max}></label>");
+            String h = F("<p><label>{label}:<br><input name='{name}' value='{value}' placeholder='{init}'></label>");
             h.replace("{name}", html_entities(name));
             h.replace("{value}", html_entities(value));
             h.replace("{init}", html_entities(init));
             h.replace("{label}", html_entities(label));
-            h.replace("{min}", String(min));
-            h.replace("{max}", String(max));
             return h;
         }
     };
@@ -156,14 +153,11 @@ namespace {  // Helpers
         }
 
         String html() {
-            String h = F(
-                    "<p><label>{label}:<br><input type='password' name='{name}' value='{value}' placeholder='{init}' minlength={min} maxlength={max}></label>");
+            String h = F("<p><label>{label}:<br><input type='password' name='{name}' value='{value}' placeholder='{init}'></label>");
             h.replace("{name}", html_entities(name));
             h.replace("{value}", html_entities(secure(value)));
             h.replace("{init}", html_entities(init));
             h.replace("{label}", html_entities(label));
-            h.replace("{min}", String(min));
-            h.replace("{max}", String(max));
             return h;
         }
     };
