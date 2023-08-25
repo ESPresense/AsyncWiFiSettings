@@ -3,22 +3,23 @@
 #define ESPFS SPIFFS
 #define ESPMAC (Sprintf("%06" PRIx32, ((uint32_t)(ESP.getEfuseMac() >> 24))))
 
+#include <DNSServer.h>
+#include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
-#include <ESPAsyncWebServer.h>
 #include <esp_task_wdt.h>
 #include <esp_wifi.h>
-
-#include <DNSServer.h>
 #include <limits.h>
+
 #include <vector>
+
 #include "AsyncWiFiSettings_strings.h"
 
 AsyncWiFiSettingsLanguage::Texts _WSL_T;
 
 #define Sprintf(f, ...) ({ char* s; asprintf(&s, f, __VA_ARGS__); String r = s; free(s); r; })
 
-namespace {  // Helpers
+namespace { // Helpers
     String slurp(const String &fn) {
         File f = ESPFS.open(fn, "r");
         String r = f.readString();
@@ -94,7 +95,7 @@ namespace {  // Helpers
     struct AsyncWiFiSettingsDropdown : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
-        std::vector <String> options;
+        std::vector<String> options;
 
         String html() {
             String h = F("<p><label>{label}:<br><select name='{name}' value='{value}'>");
@@ -104,10 +105,9 @@ namespace {  // Helpers
 
             int i = 0;
             if (value == "") {
-                for (auto &o: options) {
+                for (auto &o : options) {
                     String s = String(i);
-                    if (s == init)
-                    {
+                    if (s == init) {
                         String opt = F("<option value='' disabled selected hidden>{name}</option>");
                         opt.replace("{name}", o);
                         h += opt;
@@ -117,8 +117,7 @@ namespace {  // Helpers
             }
 
             i = 0;
-            for (auto &o : options)
-            {
+            for (auto &o : options) {
                 String s = String(i);
                 String opt = F("<option value='{code}'{sel}>{name}</option>");
                 opt.replace("{code}", String(i));
@@ -167,7 +166,7 @@ namespace {  // Helpers
 
         String html() {
             String h = F(
-                    "<p><label>{label}:<br><input type=number step=1 min={min} max={max} name='{name}' value='{value}' placeholder='{init}'></label>");
+                "<p><label>{label}:<br><input type=number step=1 min={min} max={max} name='{name}' value='{value}' placeholder='{init}'></label>");
             h.replace("{name}", html_entities(name));
             h.replace("{value}", html_entities(value));
             h.replace("{init}", html_entities(init));
@@ -183,7 +182,7 @@ namespace {  // Helpers
 
         String html() {
             String h = F(
-                    "<p><label>{label}:<br><input type=number step=0.01 min={min} max={max} name='{name}' value='{value}' placeholder='{init}'></label>");
+                "<p><label>{label}:<br><input type=number step=0.01 min={min} max={max} name='{name}' value='{value}' placeholder='{init}'></label>");
             h.replace("{name}", html_entities(name));
             h.replace("{value}", html_entities(value));
             h.replace("{init}", html_entities(init));
@@ -199,7 +198,7 @@ namespace {  // Helpers
 
         String html() {
             String h = F(
-                    "<p><label class=c><input type=checkbox name='{name}' value=1{checked}> {label} ({default}: {init})</label>");
+                "<p><label class=c><input type=checkbox name='{name}' value=1{checked}> {label} ({default}: {init})</label>");
             h.replace("{name}", html_entities(name));
             h.replace("{default}", _WSL_T.init);
             h.replace("{checked}", value.toInt() ? " checked" : "");
@@ -214,25 +213,25 @@ namespace {  // Helpers
         // in store and fill. Abuses several member variables for completely
         // different functionality.
 
-        virtual void set(const String &v) { (void) v; }
+        virtual void set(const String &v) { (void)v; }
 
         String html() {
             int space = value.indexOf(" ");
 
             String h =
-                    (value ? "<" + value + ">" : "") +
-                    (min ? html_entities(label) : label) +
-                    (value ? "</" + (space >= 0 ? value.substring(0, space) : value) + ">" : "");
+                (value ? "<" + value + ">" : "") +
+                (min ? html_entities(label) : label) +
+                (value ? "</" + (space >= 0 ? value.substring(0, space) : value) + ">" : "");
             return h;
         }
     };
 
     struct std::vector<AsyncWiFiSettingsParameter *> params;
-}
+} // namespace
 
 String AsyncWiFiSettingsClass::pstring(const String &name, const String &init, const String &label) {
     begin();
-    struct AsyncWiFiSettingsPassword *x = new AsyncWiFiSettingsPassword();
+    auto *x = new AsyncWiFiSettingsPassword();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -244,7 +243,7 @@ String AsyncWiFiSettingsClass::pstring(const String &name, const String &init, c
 
 String AsyncWiFiSettingsClass::string(const String &name, const String &init, const String &label) {
     begin();
-    struct AsyncWiFiSettingsString *x = new AsyncWiFiSettingsString();
+    auto *x = new AsyncWiFiSettingsString();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -260,18 +259,16 @@ String AsyncWiFiSettingsClass::string(const String &name, unsigned int max_lengt
     return rv;
 }
 
-String
-AsyncWiFiSettingsClass::string(const String &name, unsigned int min_length, unsigned int max_length, const String &init,
-                          const String &label) {
+String AsyncWiFiSettingsClass::string(const String &name, unsigned int min_length, unsigned int max_length, const String &init, const String &label) {
     String rv = string(name, init, label);
     params.back()->min = min_length;
     params.back()->max = max_length;
     return rv;
 }
 
-long AsyncWiFiSettingsClass::dropdown(const String &name, std::vector <String> options, long init, const String &label) {
+long AsyncWiFiSettingsClass::dropdown(const String &name, std::vector<String> options, long init, const String &label) {
     begin();
-    struct AsyncWiFiSettingsDropdown *x = new AsyncWiFiSettingsDropdown();
+    auto *x = new AsyncWiFiSettingsDropdown();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -284,7 +281,7 @@ long AsyncWiFiSettingsClass::dropdown(const String &name, std::vector <String> o
 
 long AsyncWiFiSettingsClass::integer(const String &name, long init, const String &label) {
     begin();
-    struct AsyncWiFiSettingsInt *x = new AsyncWiFiSettingsInt();
+    auto *x = new AsyncWiFiSettingsInt();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -303,7 +300,7 @@ long AsyncWiFiSettingsClass::integer(const String &name, long min, long max, lon
 
 float AsyncWiFiSettingsClass::floating(const String &name, float init, const String &label) {
     begin();
-    struct AsyncWiFiSettingsFloat *x = new AsyncWiFiSettingsFloat();
+    auto *x = new AsyncWiFiSettingsFloat();
     x->name = name;
     x->label = label.length() ? label : name;
     x->init = init;
@@ -322,10 +319,10 @@ float AsyncWiFiSettingsClass::floating(const String &name, long min, long max, f
 
 bool AsyncWiFiSettingsClass::checkbox(const String &name, bool init, const String &label) {
     begin();
-    struct AsyncWiFiSettingsBool *x = new AsyncWiFiSettingsBool();
+    auto *x = new AsyncWiFiSettingsBool();
     x->name = name;
     x->label = label.length() ? label : name;
-    x->init = String((int) init);
+    x->init = String((int)init);
     x->fill();
 
     // Apply default immediately because a checkbox has no placeholder to
@@ -338,7 +335,7 @@ bool AsyncWiFiSettingsClass::checkbox(const String &name, bool init, const Strin
 
 void AsyncWiFiSettingsClass::html(const String &tag, const String &contents, bool escape) {
     begin();
-    struct AsyncWiFiSettingsHTML *x = new AsyncWiFiSettingsHTML();
+    auto *x = new AsyncWiFiSettingsHTML();
     x->value = tag;
     x->label = contents;
     x->min = escape;
@@ -361,9 +358,9 @@ void AsyncWiFiSettingsClass::heading(const String &contents, bool escape) {
 void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
     begin();
 
-    static int num_networks = -1;
+    static int const num_networks = -1;
     static String ip = WiFi.softAPIP().toString();
-    static bool configureWifi = wifi;
+    static bool const configureWifi = wifi;
 
     if (onHttpSetup) onHttpSetup(&http);
 
@@ -378,7 +375,7 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
         return true;
     };
 
-    http.on("/", HTTP_GET, [this,redirect](AsyncWebServerRequest *request) {
+    http.on("/", HTTP_GET, [this, redirect](AsyncWebServerRequest *request) {
         if (redirect(request)) return;
 
         AsyncResponseStream *response = request->beginResponseStream("text/html");
@@ -415,8 +412,8 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
             Serial.println(F(" WiFi networks found."));
 
             response->print(F(
-                    "<style>.s{display:none}</style>" // hide "scanning"
-                    "<select name=ssid onchange=\"document.getElementsByName('password')[0].value=''\">"));
+                "<style>.s{display:none}</style>" // hide "scanning"
+                "<select name=ssid onchange=\"document.getElementsByName('password')[0].value=''\">"));
 
             String current = slurp("/wifi-ssid");
             bool found = false;
@@ -456,7 +453,7 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
             response->print(_WSL_T.language);
             response->print(F(":<br><select name=language>"));
 
-            for (auto &lang: AsyncWiFiSettingsLanguage::languages) {
+            for (auto &lang : AsyncWiFiSettingsLanguage::languages) {
                 String opt = F("<option value='{code}'{sel}>{name}</option>");
                 opt.replace("{code}", lang.first);
                 opt.replace("{name}", lang.second);
@@ -466,13 +463,13 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
             response->print(F("</select></label>"));
         }
 
-        for (auto &p: params) {
+        for (auto &p : params) {
             response->print(p->html());
         }
 
         response->print(F(
-                "<p style='position:sticky;bottom:0;text-align:right'>"
-                "<input type=submit value=\""));
+            "<p style='position:sticky;bottom:0;text-align:right'>"
+            "<input type=submit value=\""));
         response->print(_WSL_T.button_save);
         response->print(F("\"style='font-size:150%'></form>"));
         request->send(response);
@@ -497,12 +494,11 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
             if (!spurt("/AsyncWiFiSettings-language", request->arg("language"))) ok = false;
             // Don't update immediately, because there is currently
             // no mechanism for reloading param strings.
-            //language = request->arg("language");
-            //AsyncWiFiSettingsLanguage::select(T, language);
+            // language = request->arg("language");
+            // AsyncWiFiSettingsLanguage::select(T, language);
         }
 
-
-        for (auto &p: params) {
+        for (auto &p : params) {
             p->set(request->arg(p->name));
             if (!p->store()) ok = false;
         }
@@ -538,7 +534,7 @@ void AsyncWiFiSettingsClass::portal() {
     begin();
 
 #ifdef ESP32
-    WiFi.disconnect(true, true);    // reset state so .scanNetworks() works
+    WiFi.disconnect(true, true); // reset state so .scanNetworks() works
 #else
     WiFi.disconnect(true);
 #endif
@@ -566,9 +562,8 @@ void AsyncWiFiSettingsClass::portal() {
     httpSetup(true);
 
     unsigned long starttime = millis();
-    int desired = 0;
-    for (;;)
-    {
+    int const desired = 0;
+    for (;;) {
         dns.processNextRequest();
         if (onPortalWaitLoop && (millis() - starttime) > desired) {
             desired = onPortalWaitLoop();
@@ -606,7 +601,7 @@ bool AsyncWiFiSettingsClass::connect(bool portal, int wait_seconds) {
     WiFi.setHostname(hostname.c_str());
     auto status = WiFi.begin(ssid.c_str(), pw.c_str());
 
-    unsigned long wait_ms = wait_seconds * 1000UL;
+    unsigned long const wait_ms = wait_seconds * 1000UL;
     unsigned long starttime = millis();
     unsigned long lastbegin = starttime;
     while (status != WL_CONNECTED) {
@@ -649,7 +644,7 @@ void AsyncWiFiSettingsClass::begin() {
     if (user_language.length() && AsyncWiFiSettingsLanguage::available(user_language)) {
         language = user_language;
     }
-    AsyncWiFiSettingsLanguage::select(_WSL_T, language);  // can update language
+    AsyncWiFiSettingsLanguage::select(_WSL_T, language); // can update language
 
 #ifdef PORTAL_PASSWORD
 
