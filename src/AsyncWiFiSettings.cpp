@@ -90,12 +90,22 @@ namespace { // Helpers
         virtual void set(const String &) = 0;
 
         virtual String html() = 0;
+
+        virtual String json() = 0;
     };
 
     struct AsyncWiFiSettingsDropdown : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
         std::vector<String> options;
+
+        String json() {
+            if (value == "") return "";
+            String j = F("\"{name}\":\"{value}\"");
+            j.replace("{name}", name);
+            j.replace("{value}", value);
+            return j;
+        }
 
         String html() {
             String h = F("<p><label>{label}:<br><select name='{name}' value='{value}'>");
@@ -134,6 +144,14 @@ namespace { // Helpers
     struct AsyncWiFiSettingsString : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
+        String json() {
+            if (value == "") return "";
+            String j = F("\"{name}\":\"{value}\"");
+            j.replace("{name}", name);
+            j.replace("{value}", value);
+            return j;
+        }
+
         String html() {
             String h = F("<p><label>{label}:<br><input name='{name}' value='{value}' placeholder='{init}'></label>");
             h.replace("{name}", html_entities(name));
@@ -151,6 +169,10 @@ namespace { // Helpers
             if (trimmed.length()) value = trimmed;
         }
 
+        String json() {
+            return "";
+        }
+
         String html() {
             String h = F("<p><label>{label}:<br><input type='password' name='{name}' value='{value}' placeholder='{init}'></label>");
             h.replace("{name}", html_entities(name));
@@ -163,6 +185,14 @@ namespace { // Helpers
 
     struct AsyncWiFiSettingsInt : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
+
+        String json() {
+            if (value == "") return "";
+            String j = F("\"{name}\":\"{value}\"");
+            j.replace("{name}", name);
+            j.replace("{value}", value);
+            return j;
+        }
 
         String html() {
             String h = F(
@@ -180,6 +210,14 @@ namespace { // Helpers
     struct AsyncWiFiSettingsFloat : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v; }
 
+        String json() {
+            if (value == "") return "";
+            String j = F("\"{name}\":{value}");
+            j.replace("{name}", name);
+            j.replace("{value}", value);
+            return j;
+        }
+
         String html() {
             String h = F(
                 "<p><label>{label}:<br><input type=number step=0.01 min={min} max={max} name='{name}' value='{value}' placeholder='{init}'></label>");
@@ -195,6 +233,14 @@ namespace { // Helpers
 
     struct AsyncWiFiSettingsBool : AsyncWiFiSettingsParameter {
         virtual void set(const String &v) { value = v.length() ? "1" : "0"; }
+
+        String json() {
+            if (value == "") return "";
+            String j = F("\"{name}\":{value}");
+            j.replace("{name}", name);
+            j.replace("{value}", value.toInt() ? "true" : "false");
+            return j;
+        }
 
         String html() {
             String h = F(
@@ -215,6 +261,10 @@ namespace { // Helpers
 
         virtual void set(const String &v) { (void)v; }
 
+        String json() {
+            return "";
+        }
+
         String html() {
             int space = value.indexOf(" ");
 
@@ -226,7 +276,14 @@ namespace { // Helpers
         }
     };
 
-    struct std::vector<AsyncWiFiSettingsParameter *> params;
+    bool extra = false;
+
+    struct std::vector<AsyncWiFiSettingsParameter *> primary;
+    struct std::vector<AsyncWiFiSettingsParameter *> extras;
+
+    std::vector<AsyncWiFiSettingsParameter *> *params() {
+        return extra ? &extras : &primary;
+    }
 } // namespace
 
 String AsyncWiFiSettingsClass::pstring(const String &name, const String &init, const String &label) {
@@ -237,7 +294,7 @@ String AsyncWiFiSettingsClass::pstring(const String &name, const String &init, c
     x->init = init;
     x->fill();
 
-    params.push_back(x);
+    params()->push_back(x);
     return x->value.length() ? x->value : x->init;
 }
 
@@ -249,20 +306,20 @@ String AsyncWiFiSettingsClass::string(const String &name, const String &init, co
     x->init = init;
     x->fill();
 
-    params.push_back(x);
+    params()->push_back(x);
     return x->value.length() ? x->value : x->init;
 }
 
 String AsyncWiFiSettingsClass::string(const String &name, unsigned int max_length, const String &init, const String &label) {
     String rv = string(name, init, label);
-    params.back()->max = max_length;
+    params()->back()->max = max_length;
     return rv;
 }
 
 String AsyncWiFiSettingsClass::string(const String &name, unsigned int min_length, unsigned int max_length, const String &init, const String &label) {
     String rv = string(name, init, label);
-    params.back()->min = min_length;
-    params.back()->max = max_length;
+    params()->back()->min = min_length;
+    params()->back()->max = max_length;
     return rv;
 }
 
@@ -275,7 +332,7 @@ long AsyncWiFiSettingsClass::dropdown(const String &name, std::vector<String> op
     x->options = options;
     x->fill();
 
-    params.push_back(x);
+    params()->push_back(x);
     return (x->value.length() ? x->value : x->init).toInt();
 }
 
@@ -287,14 +344,14 @@ long AsyncWiFiSettingsClass::integer(const String &name, long init, const String
     x->init = init;
     x->fill();
 
-    params.push_back(x);
+    params()->push_back(x);
     return (x->value.length() ? x->value : x->init).toInt();
 }
 
 long AsyncWiFiSettingsClass::integer(const String &name, long min, long max, long init, const String &label) {
     long rv = integer(name, init, label);
-    params.back()->min = min;
-    params.back()->max = max;
+    params()->back()->min = min;
+    params()->back()->max = max;
     return rv;
 }
 
@@ -306,14 +363,14 @@ float AsyncWiFiSettingsClass::floating(const String &name, float init, const Str
     x->init = init;
     x->fill();
 
-    params.push_back(x);
+    params()->push_back(x);
     return (x->value.length() ? x->value : x->init).toFloat();
 }
 
 float AsyncWiFiSettingsClass::floating(const String &name, long min, long max, float init, const String &label) {
     float rv = floating(name, init, label);
-    params.back()->min = min;
-    params.back()->max = max;
+    params()->back()->min = min;
+    params()->back()->max = max;
     return rv;
 }
 
@@ -329,7 +386,7 @@ bool AsyncWiFiSettingsClass::checkbox(const String &name, bool init, const Strin
     // show the default, and other UI elements aren't sufficiently pretty.
     if (!x->value.length()) x->value = x->init;
 
-    params.push_back(x);
+    params()->push_back(x);
     return x->value.toInt();
 }
 
@@ -340,7 +397,7 @@ void AsyncWiFiSettingsClass::html(const String &tag, const String &contents, boo
     x->label = contents;
     x->min = escape;
 
-    params.push_back(x);
+    params()->push_back(x);
 }
 
 void AsyncWiFiSettingsClass::info(const String &contents, bool escape) {
@@ -355,10 +412,14 @@ void AsyncWiFiSettingsClass::heading(const String &contents, bool escape) {
     html("h2", contents, escape);
 }
 
+void AsyncWiFiSettingsClass::markExtra() {
+    extra = true;
+}
+
 void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
     begin();
 
-    static int const num_networks = -1;
+    static int num_networks = -1;
     static String ip = WiFi.softAPIP().toString();
     static bool const configureWifi = wifi;
 
@@ -463,7 +524,7 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
             response->print(F("</select></label>"));
         }
 
-        for (auto &p : params) {
+        for (auto &p : primary) {
             response->print(p->html());
         }
 
@@ -498,7 +559,39 @@ void AsyncWiFiSettingsClass::httpSetup(bool wifi) {
             // AsyncWiFiSettingsLanguage::select(T, language);
         }
 
-        for (auto &p : params) {
+        for (auto &p : primary) {
+            p->set(request->arg(p->name));
+            if (!p->store()) ok = false;
+        }
+
+        if (ok) {
+            request->redirect("/");
+            if (onConfigSaved) onConfigSaved();
+        } else {
+            // Could be missing SPIFFS.begin(), unformatted filesystem, or broken flash.
+            request->send(500, "text/plain", _WSL_T.error_fs);
+        }
+    });
+
+    http.on("/extras", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        AsyncResponseStream *response = request->beginResponseStream("application/json");
+        response->print("{");
+        bool needsComma = false;
+        for (auto &p : extras) {
+            auto s = p->json();
+            if (s == "") continue;
+            if (needsComma) response->print(",");
+            response->print(s);
+            needsComma = true;
+        }
+        response->print("}");
+        request->send(response);
+    });
+
+    http.on("/extras", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        bool ok = true;
+
+        for (auto &p : extras) {
             p->set(request->arg(p->name));
             if (!p->store()) ok = false;
         }
@@ -562,7 +655,7 @@ void AsyncWiFiSettingsClass::portal() {
     httpSetup(true);
 
     unsigned long starttime = millis();
-    int const desired = 0;
+    int desired = 0;
     for (;;) {
         dns.processNextRequest();
         if (onPortalWaitLoop && (millis() - starttime) > desired) {

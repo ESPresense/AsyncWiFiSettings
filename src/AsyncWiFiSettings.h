@@ -13,6 +13,7 @@ class AsyncWiFiSettingsClass {
         typedef std::function<void(String&)> TCallbackString;
 
         AsyncWiFiSettingsClass();
+        void markExtra();
         void begin();
         bool connect(bool portal = true, int wait_seconds = 60);
         void portal();
