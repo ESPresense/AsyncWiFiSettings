@@ -1,6 +1,6 @@
 {
   "name": "AsyncWiFiSettings",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "<p align=center> <img alt=\"Screenshot of basic example\" src=\"screenshots/basic-example.png\" width=\"30%\"> <img alt=\"Screenshot of advanced example\" src=\"screenshots/advanced-example.png\" width=\"30%\"> <img alt=\"Screenshot of everything\" src=\"screenshots/full.png\" width=\"30%\"> </p>",
   "main": "index.js",
   "directories": {
