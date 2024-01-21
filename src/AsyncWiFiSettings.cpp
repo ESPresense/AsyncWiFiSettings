@@ -69,6 +69,29 @@ namespace { // Helpers
         return r;
     }
 
+    String json_encode(const String &raw) {
+        String r;
+        for (unsigned int i = 0; i < raw.length(); i++) {
+            char c = raw.charAt(i);
+            switch (c) {
+                case '\"': r += "\\\""; break;
+                case '\\': r += "\\\\"; break;
+                case '\b': r += "\\b"; break;
+                case '\f': r += "\\f"; break;
+                case '\n': r += "\\n"; break;
+                case '\r': r += "\\r"; break;
+                case '\t': r += "\\t"; break;
+                default:
+                    if (c < ' ' || c > '~') {
+                        r += Sprintf("\\u%04x", c);
+                    } else {
+                        r += c;
+                    }
+            }
+        }
+        return r;
+    }
+
     struct AsyncWiFiSettingsParameter {
         String name;
         String label;
@@ -102,8 +125,8 @@ namespace { // Helpers
         String json() {
             if (value == "") return "";
             String j = F("\"{name}\":\"{value}\"");
-            j.replace("{name}", name);
-            j.replace("{value}", value);
+            j.replace("{name}", json_encode(name));
+            j.replace("{value}", json_encode(value));
             return j;
         }
 
@@ -147,8 +170,8 @@ namespace { // Helpers
         String json() {
             if (value == "") return "";
             String j = F("\"{name}\":\"{value}\"");
-            j.replace("{name}", name);
-            j.replace("{value}", value);
+            j.replace("{name}", json_encode(name));
+            j.replace("{value}", json_encode(value));
             return j;
         }
 
@@ -189,8 +212,8 @@ namespace { // Helpers
         String json() {
             if (value == "") return "";
             String j = F("\"{name}\":\"{value}\"");
-            j.replace("{name}", name);
-            j.replace("{value}", value);
+            j.replace("{name}", json_encode(name));
+            j.replace("{value}", String(value.toInt()));
             return j;
         }
 
@@ -213,8 +236,8 @@ namespace { // Helpers
         String json() {
             if (value == "") return "";
             String j = F("\"{name}\":{value}");
-            j.replace("{name}", name);
-            j.replace("{value}", value);
+            j.replace("{name}", json_encode(name));
+            j.replace("{value}", String(value.toFloat()));
             return j;
         }
 
@@ -237,7 +260,7 @@ namespace { // Helpers
         String json() {
             if (value == "") return "";
             String j = F("\"{name}\":{value}");
-            j.replace("{name}", name);
+            j.replace("{name}", json_encode(name));
             j.replace("{value}", value.toInt() ? "true" : "false");
             return j;
         }
